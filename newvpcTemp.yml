@@ -11,6 +11,7 @@ Parameters:
 
 
 
+
 Resources:
   VPC:
     Type: AWS::EC2::VPC
