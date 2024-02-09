@@ -1,0 +1,80 @@
+Database Migration on premises to cloud migration !!
+purpose of database migration ?
+the scenario of this task is to shift or add on premises database into newly configured
+cloud database i.e RDS(AWS service)
+
+for this migration we need to hit a command to extract data from our premises database server
+the command is
+
+mysqldump -u root -h localhost -p1234 studentapp>centosdata2.sql
+
+here you have data entries and database with schema in centosdata2.sql file
+
+now we have all the database dump 
+
+but the main concern rises is how to transfer this data into our newly formed database or instance ?
+1st choice is to ping our local system powershell and local centos machine
+
+then hit following command which will get us all the data from local centos machine
+mind you your powershell and bash shell should be in network (ping)
+scp -r root@192.168.0.3:/id_rsa C:\Users\Anup\Desktop
+scp -r root@ipofcentosserver:/filename destinationofwindowsserver
+
+other way is 
+connect our centos m/c using moba extreme client (password based ssh)
+just put our centos m/c public ip into moba extreme
+then mind you you need to upload aws instance's ssh key into our centos m/c using mobaextreme
+
+now you have privatekey of aws instance ,
+always give 600 permission of your instance key since it doesnt allow your other users acess,
+chmod 600 privatekey.pen
+
+then hit following command which will transfer data to ec2 instance
+
+scp -i deletekey.pem centosentry1.sql centosentry2.sql  ec2-user@65.0.105.137:/home/ec2-user/
+
+
+now you have database and dump as well
+now in the apache's conf file > context.xml file
+   <Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource"
+        maxTotal="100" maxIdle="30" maxWaitMillis="10000"
+        username="admin" password="12345678" driverClassName="com.mysql.jdbc.Driver"
+        url="jdbc:mysql://database-1.cz80mgqccd5x.ap-south-1.rds.amazonaws.com:3306/studentapp"/>
+
+here in username - give the name assigned to db
+password - 12345678 (assigned to rds)
+then in db:endpoint - give rds databases endpoint in this place
+save context.xml and start catalina and mariadb once
+
+
+just login into our rds database
+mysql -h database-1.cz80mgqccd5x.ap-south-1.rds.amazonaws.com  -u admin -p12345678
+
+and just
+CREATE DATABASE studentapp;
+
+note - do not add table into out studentapp database , it will be automatically created once we dump our on premises data with schema into rds database.
+
+hit this command and your db will be dumped into rds and you will be able to view all the all the data that was on premises into your cloud rds.
+ 
+mysql -u admin -h database-1.cz80mgqccd5x.ap-south-1.rds.amazonaws.com  -p12345678 studentapp < /home/ec2-user/centosentry2.sql
+
+syntax
+mysql -u admin -h endpointRDS -p12345678 databasename < location-of-our-.sqldata-dump
+
+Note - once you create RDS kindly ensure you have attached your instance to your rds
+--------------------------------------------------------------------------------------
+RDS migration 
+dump file 
+dum.sql  pushed on ec2 instance >> 
+
+mysql -h rdsendpoint -u username -p12345678    <<  dbname
+
+always give 600 permission of your instance key since it doesnt allow your other users acess
+
+mysqldump -u root -h localhost -p1234 studentapp>centosdata2.sql
+
+scp -i deletekey.pem centosentry1.sql centosentry2.sql  ec2-user@65.0.105.137:/home/ec2-user/
+
+
+mysql -u admin -h database-1.cz80mgqccd5x.ap-south-1.rds.amazonaws.com  -p12345678 studentapp < /home/ec2-user/centosentry2.sql
