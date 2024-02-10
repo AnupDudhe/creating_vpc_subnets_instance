@@ -6,7 +6,7 @@ pipeline {
         stage('Repository-pull') {
             steps {
                 sh '''
-                echo "your CFT is pulled from github repository"
+                echo "your CFT is pulled from github repository !"
                 sudo git pull 'https://github.com/AnupDudhe/creating_vpc_subnets_instance.git'
                 '''
 
