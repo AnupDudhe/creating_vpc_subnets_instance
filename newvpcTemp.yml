@@ -4,7 +4,6 @@ Description: My first template
 
 
 
-
 Parameters:
   InstanceType:
     Description: EC2 instance type
